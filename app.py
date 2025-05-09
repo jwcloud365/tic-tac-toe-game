@@ -140,4 +140,5 @@ def make_move():
 if __name__ == '__main__':
     # Use environment variable for port if available (for Azure)
     port = int(os.environ.get('PORT', 5000))
-    app.run(host='0.0.0.0', port=port)
+    print(f"Starting Tic-Tac-Toe server on http://localhost:{port}")
+    app.run(host='0.0.0.0', port=port, debug=True)
