@@ -103,6 +103,10 @@ def index():
     game.reset_game()
     return render_template('index.html')
 
+@app.route('/astronomy-club')
+def astronomy_club():
+    return render_template('astronomy_club.html')
+
 @app.route('/reset', methods=['POST'])
 def reset():
     game.reset_game()
