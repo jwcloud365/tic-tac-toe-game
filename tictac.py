@@ -137,11 +137,13 @@ class TicTacToe:
         else:  # Tie or game not over
             return 0
     
-    def minimax(self, depth, is_maximizing):
-        """Minimax algorithm implementation
+    def minimax(self, depth, is_maximizing, alpha=float('-inf'), beta=float('inf')):
+        """Minimax algorithm implementation with alpha-beta pruning
         Args:
             depth: Current depth in the game tree
             is_maximizing: True if maximizing player's turn (computer), False otherwise
+            alpha: Best value that maximizer can guarantee
+            beta: Best value that minimizer can guarantee
         Returns:
             Best score for the current position
         """
@@ -156,10 +158,13 @@ class TicTacToe:
                     # Make the move
                     self.board[i] = "O"
                     # Recursively evaluate
-                    eval_score = self.minimax(depth + 1, False)
+                    eval_score = self.minimax(depth + 1, False, alpha, beta)
                     # Undo the move
                     self.board[i] = " "
                     max_eval = max(max_eval, eval_score)
+                    alpha = max(alpha, eval_score)
+                    if beta <= alpha:
+                        break  # Alpha-beta pruning
             return max_eval
         else:  # Player's turn (minimize score)
             min_eval = float('inf')
@@ -168,10 +173,13 @@ class TicTacToe:
                     # Make the move
                     self.board[i] = "X"
                     # Recursively evaluate
-                    eval_score = self.minimax(depth + 1, True)
+                    eval_score = self.minimax(depth + 1, True, alpha, beta)
                     # Undo the move
                     self.board[i] = " "
                     min_eval = min(min_eval, eval_score)
+                    beta = min(beta, eval_score)
+                    if beta <= alpha:
+                        break  # Alpha-beta pruning
             return min_eval
     
     def get_best_move(self):
