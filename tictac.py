@@ -80,24 +80,13 @@ class TicTacToe:
                 self.computer_move()
 
     def computer_move(self):
-        # Try to win
-        move = self.find_winning_move("O")
-        if move is not None:
-            index = move
-        # Block player's winning move
-        elif (block_move := self.find_winning_move("X")) is not None:
-            index = block_move
-        # Take center if available
-        elif self.board[4] == " ":
-            index = 4
-        # Take a corner if available
-        elif any(self.board[i] == " " for i in [0, 2, 6, 8]):
-            corners = [i for i in [0, 2, 6, 8] if self.board[i] == " "]
-            index = random.choice(corners)
-        # Take any available spot
-        else:
+        # Use minimax algorithm to find the best move
+        index = self.get_best_move()
+        
+        # If no move found (shouldn't happen), fall back to any available spot
+        if index is None:
             empty_indices = [i for i, spot in enumerate(self.board) if spot == " "]
-            if empty_indices:  # Check if there are any empty spots
+            if empty_indices:
                 index = random.choice(empty_indices)
             else:
                 return  # No moves available
@@ -133,6 +122,80 @@ class TicTacToe:
             [0, 4, 8], [2, 4, 6]              # Diagonals
         ]
         return any(all(self.board[i] == player for i in condition) for condition in win_conditions)
+    
+    def is_terminal_state(self):
+        """Check if the game has ended (win or tie)"""
+        return self.check_winner("X") or self.check_winner("O") or " " not in self.board
+    
+    def evaluate_board(self):
+        """Evaluate the current board state for minimax
+        Returns: 1 if computer wins, -1 if player wins, 0 if tie"""
+        if self.check_winner("O"):  # Computer wins
+            return 1
+        elif self.check_winner("X"):  # Player wins
+            return -1
+        else:  # Tie or game not over
+            return 0
+    
+    def minimax(self, depth, is_maximizing):
+        """Minimax algorithm implementation
+        Args:
+            depth: Current depth in the game tree
+            is_maximizing: True if maximizing player's turn (computer), False otherwise
+        Returns:
+            Best score for the current position
+        """
+        # Base case: if game is over, return the evaluation
+        if self.is_terminal_state():
+            return self.evaluate_board()
+        
+        if is_maximizing:  # Computer's turn (maximize score)
+            max_eval = float('-inf')
+            for i in range(9):
+                if self.board[i] == " ":
+                    # Make the move
+                    self.board[i] = "O"
+                    # Recursively evaluate
+                    eval_score = self.minimax(depth + 1, False)
+                    # Undo the move
+                    self.board[i] = " "
+                    max_eval = max(max_eval, eval_score)
+            return max_eval
+        else:  # Player's turn (minimize score)
+            min_eval = float('inf')
+            for i in range(9):
+                if self.board[i] == " ":
+                    # Make the move
+                    self.board[i] = "X"
+                    # Recursively evaluate
+                    eval_score = self.minimax(depth + 1, True)
+                    # Undo the move
+                    self.board[i] = " "
+                    min_eval = min(min_eval, eval_score)
+            return min_eval
+    
+    def get_best_move(self):
+        """Find the best move using minimax algorithm
+        Returns: Best move index, or None if no moves available
+        """
+        best_move = None
+        best_score = float('-inf')
+        
+        for i in range(9):
+            if self.board[i] == " ":
+                # Make the move
+                self.board[i] = "O"
+                # Evaluate the move
+                score = self.minimax(0, False)
+                # Undo the move
+                self.board[i] = " "
+                
+                # Update best move if this is better
+                if score > best_score:
+                    best_score = score
+                    best_move = i
+        
+        return best_move
 
 if __name__ == "__main__":
     game = TicTacToe()
