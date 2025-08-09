@@ -1,0 +1,2 @@
+# No external dependencies required - uses built-in tkinter
+# This file exists to satisfy the Azure deployment workflow
